@@ -1,7 +1,7 @@
 class Header extends HTMLElement {
     connectedCallback() {
         this.innerHTML = `
-            <header>
+            <header style="border-bottom: 1px solid #ccc; padding-bottom: 1rem; margin-bottom: 1rem; place-items: center; display: flex; flex-direction: column;">
                 <div>Code provided by: <a href="${this.link}" target="_blank">${this.link}</a></div>
                 <div style="margin-top: 0.5rem;">Return <a href="../pages.html">Home</a></div>
             </header>
