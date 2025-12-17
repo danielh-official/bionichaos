@@ -1,3 +1,3 @@
-Code ripped from <https://bionichaos.com/>.
+Code ripped from <https://bionichaos.com/>. Hosted on GitHub pages.
 
-- Pages: [Link](/pages.html)
+Go to the pages [link](/pages.html) to access the currently available pages.
