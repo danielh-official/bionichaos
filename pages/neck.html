@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartphone Neck Simulation</title>
+    <meta name="description"
+        content="An interactive simulation to demonstrate the biomechanical concept of 'Smartphone Neck' or 'Text Neck.' Visualize the increasing load on your neck as you tilt your head forward.">
+    <meta name="keywords"
+        content="smartphone neck, text neck, cervical spine, neck strain, biomechanics, posture, interactive simulation, educational tool">
+    <meta property="og:title" content="Smartphone Neck Simulation">
+    <meta property="og:description"
+        content="An interactive simulation to demonstrate the biomechanical concept of 'Smartphone Neck' or 'Text Neck.' Visualize the increasing load on your neck as you tilt your head forward.">
+    <meta property="og:image" content="https://bionichaos.com/Neck/thumbnail.png">
+    <meta property="og:url" content="https://bionichaos.com/Neck">
+    <meta property="og:type" content="website">
+    <meta name="author" content="BioniChaos">
+    <meta name="publish_date" content="2023-10-01">
+    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --accent-color: #28a745;
+            --text-color: #333;
+            --background-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --canvas-height-ratio: 0.8;
+            /* 80% of viewport height */
+        }
+
+        main {
+            flex-grow: 1;
+            /* Allows main content to take available space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        #simulation-container {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            box-sizing: border-box;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            gap: 32px;
+        }
+
+        #neckCanvas {
+            flex: 1 1 60%;
+            max-width: 600px;
+            min-width: 260px;
+            min-height: 220px;
+            border: 1px solid var(--border-color);
+            background-color: #ffffff;
+            touch-action: pan-y;
+            cursor: grab;
+            display: block;
+        }
+
+        .controls {
+            flex: 1 1 40%;
+            min-width: 220px;
+            max-width: 340px;
+            margin-top: 0;
+            margin-left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 18px;
+        }
+
+        .control-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 80%;
+            max-width: 400px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 5px;
+            outline: none;
+            transition: opacity .2s;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background: var(--secondary-color);
+            outline: none;
+            border-radius: 20px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+            transition: .3s;
+            cursor: pointer;
+        }
+
+        .toggle-switch input[type="checkbox"]:checked {
+            background: var(--accent-color);
+        }
+
+        .toggle-switch input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            background: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: .3s;
+        }
+
+        .toggle-switch input[type="checkbox"]:checked::before {
+            left: 22px;
+        }
+
+        section {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 0.9em;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 900px) {
+            #simulation-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+            }
+
+            #neckCanvas,
+            .controls {
+                max-width: 100%;
+                min-width: 0;
+            }
+
+            .controls {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 10px 15px;
+            }
+
+            main {
+                padding: 15px;
+            }
+
+            #simulation-container {
+                padding: 15px;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            input[type="range"] {
+                width: 90%;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            section {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            input[type="range"] {
+                width: 95%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div>Code provided by: <a href="https://bionichaos.com/Neck/" target="_blank">https://bionichaos.com/Neck/</a></div>
+        <div style="margin-top: 0.5rem;">Return <a href="../pages.html">Home</a></div>
+    </header>
+    
+    <main>
+        <div id="simulation-container">
+            <canvas id="neckCanvas" width="1200" height="1096" style="width: 600px; height: 548px;"></canvas>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="angleSlider">Head Angle: <span id="currentAngle">0</span>°</label>
+                    <input type="range" id="angleSlider" min="0" max="60" value="0" step="1">
+                </div>
+                <div class="control-group">
+                    <p>Effective Load on Neck: <span id="currentWeight">4-5</span> kg</p>
+                </div>
+                <div class="button-group">
+                    <button id="resetButton">Reset (0°)</button>
+                    <button id="playDemoButton">Play Demo</button>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="sonificationToggle">
+                        <label for="sonificationToggle">Sonification</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="overview">
+            <h2>Web-App Overview</h2>
+            <p>This interactive simulation demonstrates the biomechanical concept of "Smartphone Neck" or "Text Neck."
+                It visualizes how the effective load on your cervical spine (neck) dramatically increases as you tilt
+                your head forward, a common posture when using smartphones or other handheld devices.</p>
+            <p>The simulation uses data consistent with the widely cited study by K. K. Hansraj (2014), illustrating
+                that a 60-degree forward tilt can put as much as 27 kilograms (about 60 pounds) of force on your neck,
+                equivalent to carrying a 7-year-old child on your head!</p>
+            <p>Understanding this phenomenon is crucial for promoting healthier digital habits and preventing
+                musculoskeletal issues related to prolonged poor posture.</p>
+        </section>
+
+        <section id="how-to-use">
+            <h2>How to Use</h2>
+            <ul>
+                <li><strong>Adjust Head Angle:</strong> Use the "Head Angle" slider to manually change the tilt of the
+                    head. You can drag the slider with your mouse or finger, or use the left/right arrow keys when the
+                    slider is focused.</li>
+                <li><strong>Observe Load:</strong> As you change the angle, observe the "Effective Load on Neck"
+                    displayed below the slider. The weight icon on the person's head will also visually represent the
+                    load.</li>
+                <li><strong>Visual Stress Indicators:</strong>
+                    <ul>
+                        <li>The neck area changes color from green (low stress) to red (high stress)</li>
+                        <li>The weight icon grows larger and turns red as the load increases</li>
+                        <li>Red force arrows show the direction and magnitude of the load</li>
+                        <li>Stress radiations appear at the neck base showing concentration points</li>
+                        <li>The spine line thickness and color indicate stress levels</li>
+                    </ul>
+                </li>
+                <li><strong>Reset Button:</strong> Click or tap the "Reset (0°)" button to bring the head back to a
+                    neutral, upright position.</li>
+                <li><strong>Play Demo:</strong> Click or tap the "Play Demo" button to initiate an automatic sequence
+                    that cycles through various angles, showcasing the increasing load. This is useful for quickly
+                    grasping the concept.</li>
+                <li><strong>Sonification Toggle:</strong> Use the switch to turn sound effects on or off. When on, the
+                    pitch of a tone will change, becoming higher as the effective load increases, providing an auditory
+                    representation of the strain.</li>
+                <li><strong>Stress Legend:</strong> Check the top-right corner of the simulation for a visual stress
+                    level indicator and color coding explanation.</li>
+                <li><strong>Responsiveness:</strong> The layout adapts to different screen sizes, making it usable on
+                    desktops, tablets, and mobile phones.</li>
+            </ul>
+        </section>
+
+        <section id="future-directions">
+            <h2>Future Directions</h2>
+            <p>This simulation provides a foundational understanding. Potential enhancements could include:</p>
+            <ul>
+                <li><strong>More Detailed Anatomy:</strong> Adding more anatomical detail to the spine and muscles to
+                    better illustrate where the stress occurs.</li>
+                <li><strong>User Input for Head Weight:</strong> Allowing users to input their estimated head weight for
+                    a more personalized simulation.</li>
+                <li><strong>Posture Feedback:</strong> Integrating with device sensors (if possible in a web context,
+                    e.g., webcam posture analysis) to provide real-time feedback on user's posture.</li>
+                <li><strong>Exercise Suggestions:</strong> Including a section with recommended neck stretches and
+                    strengthening exercises to counteract the effects of "Smartphone Neck."</li>
+                <li><strong>Accessibility Improvements:</strong> Enhancing keyboard navigation and screen reader support
+                    for a wider audience.</li>
+                <li><strong>Advanced Physics Visualization:</strong> Showing vectors for forces and torques to provide a
+                    deeper scientific understanding.</li>
+                <li><strong>Historical Data View:</strong> Allowing users to log their usage patterns (if integrated
+                    with a tracking app) and see historical data on cumulative neck strain.</li>
+            </ul>
+        </section>
+
+        <section id="exercises">
+            <h2>Exercises to Counteract "Smartphone Neck"</h2>
+            <p>Perform these simple exercises regularly to help alleviate neck strain and improve posture.</p>
+            <ul>
+                <li><strong>Chin Tucks:</strong> Sit or stand tall. Gently tuck your chin towards your neck, as if
+                    making a double chin. Hold for 5 seconds and repeat 10 times.</li>
+                <li><strong>Neck Tilts (Side to Side):</strong> Slowly tilt your head, bringing your ear towards your
+                    right shoulder. Hold for 15-20 seconds. Repeat on the left side.</li>
+                <li><strong>Shoulder Blade Squeezes:</strong> Squeeze your shoulder blades together. Hold for 5 seconds
+                    and repeat 15 times.</li>
+            </ul>
+            <p><strong>Disclaimer:</strong> If you experience pain, stop immediately and consult a healthcare
+                professional.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Smartphone Neck Simulation. Based on K. K. Hansraj's 2014 study.</p>
+    </footer>
+
+    <script>
+        // Data for angles and weights (JSON-like structure)
+        const angleData = [
+            { angle: 0, weight: "4-5" },
+            { angle: 15, weight: 12 },
+            { angle: 30, weight: 20 },
+            { angle: 45, weight: 25 },
+            { angle: 60, weight: 27 }
+        ];
+
+        // Canvas setup
+        const canvas = document.getElementById('neckCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentAngle = 0;
+
+        // Controls
+        const angleSlider = document.getElementById('angleSlider');
+        const currentAngleSpan = document.getElementById('currentAngle');
+        const currentWeightSpan = document.getElementById('currentWeight');
+        const resetButton = document.getElementById('resetButton');
+        const playDemoButton = document.getElementById('playDemoButton');
+        const sonificationToggle = document.getElementById('sonificationToggle');
+
+        // Sonification
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let isSonificationOn = false;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                oscillator = audioContext.createOscillator();
+                gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine'; // Sine wave for a smooth tone
+                oscillator.frequency.value = 0; // Start silent
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = 0; // Start silent
+
+                oscillator.start();
+            }
+        }
+
+        function updateSonification(angle) {
+            if (!isSonificationOn || !audioContext) {
+                if (gainNode) gainNode.gain.value = 0; // Ensure silent if off
+                return;
+            }
+
+            // Map angle to frequency (e.g., 0-60 degrees -> 100-800 Hz)
+            const minFreq = 100;
+            const maxFreq = 800;
+            const freq = minFreq + (angle / 60) * (maxFreq - minFreq);
+            oscillator.frequency.value = freq;
+
+            // Map angle to volume (e.g., 0-60 degrees -> 0.0-0.5 volume)
+            const minGain = 0;
+            const maxGain = 0.5;
+            const gain = minGain + (angle / 60) * (maxGain - minGain);
+            gainNode.gain.value = gain;
+        }
+
+        sonificationToggle.addEventListener('change', () => {
+            isSonificationOn = sonificationToggle.checked;
+            if (isSonificationOn) {
+                initAudio();
+                updateSonification(currentAngle);
+            } else {
+                if (gainNode) gainNode.gain.value = 0; // Turn off sound immediately
+            }
+        });
+
+        // Resize Canvas dynamically and support high-DPI devices
+        function resizeCanvas() {
+            // Set canvas CSS size to 90% of parent container or a max width
+            const container = document.getElementById('simulation-container');
+            const containerWidth = container.clientWidth - 40; // Account for padding
+            const cssWidth = Math.min(containerWidth, 600); // Max width for clarity (CSS pixels)
+            const cssHeight = Math.max(220, Math.round(window.innerHeight * var_canvas_height_ratio)); // Ensure a minimum height
+
+            // Apply CSS size
+            canvas.style.width = cssWidth + 'px';
+            canvas.style.height = cssHeight + 'px';
+
+            // Scale internal pixel buffer for devicePixelRatio for crisp rendering
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(cssWidth * dpr);
+            canvas.height = Math.floor(cssHeight * dpr);
+
+            // Scale drawing operations so code can keep using CSS pixel coordinates
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            // Redraw
+            drawPerson(currentAngle);
+        }
+
+        // Variable for canvas height ratio, accessed by JS
+        let var_canvas_height_ratio = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-height-ratio'));
+
+        window.addEventListener('resize', resizeCanvas);
+        // Initial call to set canvas size
+        setTimeout(resizeCanvas, 0); // Delay slightly to ensure computed styles are ready
+
+        // Drawing Functions
+        function drawPerson(angle) {
+            // Use CSS coordinates (after ctx.setTransform) for layout so that
+            // drawing works consistently across DPR values.
+            const dpr = window.devicePixelRatio || 1;
+            const cssWidth = canvas.width / dpr;
+            const cssHeight = canvas.height / dpr;
+
+            // Get current time for animation effects
+            const now = performance.now();
+
+            ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+            const personWidth = cssWidth * 0.4; // Relative width of person
+            const personHeight = cssHeight * 0.8; // Relative height
+            const xOffset = (cssWidth - personWidth) / 2;
+            const yOffset = cssHeight - personHeight;
+
+            // Calculate stress level (0-1) based on angle
+            const stressLevel = angle / 60;
+
+            // NEW: Slouch factor for posture change
+            const slouchAngle = (stressLevel * 15) * (Math.PI / 180); // Max 15-degree slouch
+
+            // Draw Body with dynamic posture
+            drawBody(xOffset, yOffset, personWidth, personHeight, stressLevel, slouchAngle);
+
+            // Head and Neck base
+            const headCenterX = xOffset + personWidth / 2;
+            const headCenterY = yOffset + personHeight * 0.3;
+            const neckBaseX = headCenterX;
+            const neckBaseY = yOffset + personHeight * 0.3; // Base of the neck
+
+            // Calculate hand position for arm
+            const phoneLocalX = Math.cos((90 + angle) * Math.PI / 180) * personWidth * 0.5 - 18;
+            const phoneLocalY = - (personWidth * 0.15 * 0.3) + Math.sin((90 + angle) * Math.PI / 180) * personWidth * 0.5 + 8;
+            const handLocalX = phoneLocalX + 18; // center of phone
+            const handLocalY = phoneLocalY + 56; // bottom of phone
+            const handWorldX = neckBaseX + handLocalX * Math.cos(angle * Math.PI / 180) - handLocalY * Math.sin(angle * Math.PI / 180);
+            const handWorldY = neckBaseY + handLocalX * Math.sin(angle * Math.PI / 180) + handLocalY * Math.cos(angle * Math.PI / 180);
+
+            // Draw arm
+            ctx.strokeStyle = '#FFD0A8'; // skin color
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(neckBaseX, neckBaseY + 10); // start from below neck
+            ctx.lineTo(handWorldX, handWorldY);
+            ctx.stroke();
+
+            // Draw hand
+            ctx.fillStyle = '#FFD0A8';
+            ctx.beginPath();
+            ctx.arc(handWorldX, handWorldY, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Save context state before rotation
+            ctx.save();
+
+            // Translate to the rotation point (neck base)
+            ctx.translate(neckBaseX, neckBaseY);
+
+            // Rotate by the specified angle (convert degrees to radians, 0 degrees is upright)
+            // The angle in the simulation is the tilt *down* from vertical, so we apply negative angle
+            ctx.rotate(angle * Math.PI / 180);
+
+            // Draw head and related elements
+            const headRadius = personWidth * 0.15;
+            drawHead(headRadius, angle, stressLevel, personWidth, now);
+
+            // Restore context to original state (undo rotation)
+            ctx.restore();
+
+            // Draw spine as a single line with color/thickness based on stress
+            const spineStartY = neckBaseY;
+            const spineEndY = neckBaseY + personHeight * 0.6;
+            ctx.save();
+            ctx.translate(neckBaseX, 0);
+            ctx.rotate(slouchAngle * 0.5); // Apply half of the slouch to the spine's curve
+
+            const spineGrad = ctx.createLinearGradient(0, spineStartY, 0, spineEndY);
+            spineGrad.addColorStop(0, `rgb(${Math.floor(120 + 135 * stressLevel)}, ${Math.floor(120 * (1 - stressLevel))}, 40)`);
+            spineGrad.addColorStop(1, `rgb(${Math.floor(120 + 135 * stressLevel)}, ${Math.floor(120 * (1 - stressLevel))}, 40)`);
+
+            ctx.strokeStyle = spineGrad;
+            ctx.lineWidth = 8 + stressLevel * 6;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(0, spineStartY);
+            ctx.lineTo(0, spineEndY);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Draw visual legend in top-right corner
+            drawLegend(angle, stressLevel, cssWidth, cssHeight);
+        }
+
+        function drawLegend(angle, stressLevel, cssWidth = canvas.width, cssHeight = canvas.height) {
+            const legendX = cssWidth - 150;
+            const legendY = 20;
+
+            // Legend background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(legendX - 10, legendY - 10, 140, 100);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(legendX - 10, legendY - 10, 140, 100);
+
+            // Legend title
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Stress Level', legendX, legendY + 10);
+
+            // Stress bar
+            const barWidth = 100;
+            const barHeight = 10;
+
+            // Background bar with gradient
+            ctx.fillStyle = '#f3f3f3';
+            roundRect(ctx, legendX, legendY + 20, barWidth, barHeight, 4);
+            ctx.fill();
+
+            // Stress gradient bar
+            const g = ctx.createLinearGradient(legendX, 0, legendX + barWidth, 0);
+            g.addColorStop(0, '#2ecc71');
+            g.addColorStop(1, '#e74c3c');
+            const stressBarWidth = barWidth * stressLevel;
+            ctx.fillStyle = g;
+            roundRect(ctx, legendX, legendY + 20, stressBarWidth, barHeight, 4);
+            ctx.fill();
+
+            // Stress level text
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.fillText(`${Math.round(stressLevel * 100)}%`, legendX, legendY + 45);
+
+            // Color coding explanation
+            ctx.fillText('Green: Low stress', legendX, legendY + 60);
+            ctx.fillText('Red: High stress', legendX, legendY + 75);
+        }
+
+        // Helper Functions for Modular Drawing
+        function drawBody(xOffset, yOffset, personWidth, personHeight, stressLevel, slouchAngle) {
+            ctx.save();
+
+            // Body with slouching effect
+            const bodyX = xOffset + personWidth * 0.2;
+            const bodyY = yOffset + personHeight * 0.3;
+            const bodyWidth = personWidth * 0.6;
+            const bodyHeight = personHeight * 0.7;
+
+            // Shoulders tilt forward with stress
+            ctx.translate(bodyX + bodyWidth / 2, bodyY);
+            ctx.rotate(slouchAngle * 0.3);
+            ctx.translate(-bodyWidth / 2, 0);
+
+            // Shirt - light blue with slight gradient
+            const shirtGrad = ctx.createLinearGradient(0, 0, 0, bodyHeight * 0.6);
+            shirtGrad.addColorStop(0, '#B8D8E6');
+            shirtGrad.addColorStop(1, '#ADD8E6');
+            ctx.fillStyle = shirtGrad;
+            ctx.fillRect(0, 0, bodyWidth, bodyHeight * 0.6);
+
+            ctx.restore();
+
+            // Pants - static, unaffected by slouch
+            ctx.fillStyle = '#808080';
+            ctx.fillRect(xOffset + personWidth * 0.25, yOffset + personHeight * 0.65, personWidth * 0.5, personHeight * 0.35);
+        }
+
+        // Helper function to draw the head with all details
+        function drawHead(headRadius, angle, stressLevel, personWidth, now) {
+            // Draw head with shading
+            const headGrad = ctx.createRadialGradient(-headRadius * 0.3, -headRadius * 1.1, headRadius * 0.2, 0, -headRadius, headRadius * 1.2);
+            headGrad.addColorStop(0, '#FFEFD6');
+            headGrad.addColorStop(0.6, '#FFD0A8');
+            headGrad.addColorStop(1, '#E0A982');
+            ctx.fillStyle = headGrad;
+            ctx.beginPath();
+            // more natural oval head
+            ctx.ellipse(0, -headRadius, headRadius * 1.05, headRadius * 1.15, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // soft rim shadow for depth
+            ctx.fillStyle = 'rgba(0,0,0,0.06)';
+            ctx.beginPath();
+            ctx.ellipse(0, -headRadius + headRadius * 0.15, headRadius * 1.02, headRadius * 0.35, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw neck top (relative to rotated context) with stress coloring
+            const neckStressColor = `rgb(${Math.floor(255 * stressLevel)}, ${Math.floor(200 * (1 - stressLevel))}, 0)`;
+            ctx.fillStyle = neckStressColor;
+            ctx.fillRect(-headRadius * 0.38, 0, headRadius * 0.76, headRadius * 0.55);
+
+            // Draw hair (simple shaded cap)
+            ctx.fillStyle = '#2b2b2b';
+            ctx.beginPath();
+            ctx.ellipse(0, -headRadius - headRadius * 0.05, headRadius * 1.12, headRadius * 0.65, 0, Math.PI, 2 * Math.PI);
+            ctx.fill();
+            // hair highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.06)';
+            ctx.beginPath();
+            ctx.ellipse(-headRadius * 0.25, -headRadius - headRadius * 0.2, headRadius * 0.45, headRadius * 0.18, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Prepare phone position (so facial features can aim at it)
+            const phoneW = 36;
+            const phoneH = 56;
+            const phoneX = Math.cos((90 + angle) * Math.PI / 180) * personWidth * 0.5 - 18;
+            const phoneY = -headRadius * 0.3 + Math.sin((90 + angle) * Math.PI / 180) * personWidth * 0.5 + 8;
+
+            // Draw eye (relative to rotated context), aim pupil toward phone (eye on left side)
+            ctx.fillStyle = 'black';
+            const eyeX = -headRadius * 0.4; // Move eye to left side
+            const eyeY = -headRadius * 0.3;
+            const pupilRadius = headRadius * 0.08;
+            // Compute vector from eye to phone and limit pupil offset so it stays inside the iris
+            const dx = phoneX - eyeX;
+            const dy = phoneY - eyeY;
+            const dist = Math.hypot(dx, dy) || 1;
+            const maxOffset = headRadius * 0.08; // how far pupil can move from eye center
+            const offsetScale = Math.min(maxOffset, dist * 0.12) / dist;
+            const pupilX = eyeX + dx * offsetScale;
+            const pupilY = eyeY + dy * offsetScale;
+            ctx.beginPath();
+            ctx.arc(pupilX, pupilY, pupilRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw smartphone (rotated 45 degrees)
+            ctx.save();
+            ctx.translate(phoneX + phoneW / 2, phoneY + phoneH / 2);
+            ctx.rotate(-Math.PI / 4); // -45 degrees
+            ctx.translate(-phoneW / 2, -phoneH / 2);
+
+            // phone shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            roundRect(ctx, 4, 6, phoneW, phoneH, 6);
+            ctx.fill();
+
+            // phone body
+            const phoneGrad = ctx.createLinearGradient(0, 0, phoneW, phoneH);
+            phoneGrad.addColorStop(0, '#3b3b3b');
+            phoneGrad.addColorStop(1, '#1f1f1f');
+            ctx.fillStyle = phoneGrad;
+            roundRect(ctx, 0, 0, phoneW, phoneH, 6);
+            ctx.fill();
+
+            // screen
+            ctx.fillStyle = '#A8D9FF';
+            roundRect(ctx, 4, 8, phoneW - 8, phoneH - 16, 4);
+            ctx.fill();
+
+            ctx.restore();
+
+            // Draw weight icon (kettlebell-like) (relative to rotated head, but positioned as if resting on neck)
+            const weightValue = getWeightForAngle(angle);
+            const weightText = typeof weightValue === 'number' ? `${weightValue} kg` : weightValue;
+
+            // Dynamic weight icon size and color based on load
+            let baseWeightIconSize = 40;
+            let weightIconSize = baseWeightIconSize + (stressLevel * 20); // Grows with stress
+
+            // Color changes from gray to red as stress increases
+            const weightR = Math.floor(51 + (stressLevel * 204)); // 51 to 255
+            const weightG = Math.floor(51 * (1 - stressLevel)); // 51 to 0
+            const weightB = Math.floor(51 * (1 - stressLevel)); // 51 to 0
+            ctx.fillStyle = `rgb(${weightR}, ${weightG}, ${weightB})`;
+
+            // Draw kettlebell-ish weight with shadow and highlight
+            ctx.save();
+            ctx.translate(0, -headRadius - weightIconSize / 2 - 10);
+            // main body
+            ctx.fillStyle = `rgb(${weightR}, ${weightG}, ${weightB})`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, weightIconSize / 2, weightIconSize / 2.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // handle
+            ctx.lineWidth = Math.max(3, weightIconSize * 0.1);
+            ctx.strokeStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(0, -weightIconSize * 0.45, weightIconSize * 0.42, Math.PI * 0.15, Math.PI * 0.85, false);
+            ctx.stroke();
+            // highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.beginPath();
+            ctx.ellipse(-weightIconSize * 0.18, -weightIconSize * 0.06, weightIconSize * 0.18, weightIconSize * 0.28, -0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Draw weight text on top of icon
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(weightText, 0, -headRadius - weightIconSize / 2 - 10);
+        }
+
+        function drawMuscles(xOffset, yOffset, personWidth, personHeight, stressLevel, slouchAngle) {
+            // Draw trapezius muscles that stretch and change color with stress
+            const shoulderY = yOffset + personHeight * 0.32;
+            const neckX = xOffset + personWidth / 2;
+
+            // Left trapezius
+            const leftShoulderX = xOffset + personWidth * 0.15;
+            const rightShoulderX = xOffset + personWidth * 0.85;
+
+            // Muscle stress color (blue relaxed -> red stressed)
+            const muscleR = Math.floor(100 + (155 * stressLevel));
+            const muscleG = Math.floor(150 * (1 - stressLevel));
+            const muscleB = Math.floor(200 * (1 - stressLevel));
+            const muscleAlpha = 0.4 + (stressLevel * 0.4);
+
+            ctx.fillStyle = `rgba(${muscleR}, ${muscleG}, ${muscleB}, ${muscleAlpha})`;
+
+            // Left trapezius muscle
+            ctx.beginPath();
+            ctx.moveTo(neckX, shoulderY);
+            ctx.quadraticCurveTo(leftShoulderX + personWidth * 0.1, shoulderY + personHeight * 0.05,
+                leftShoulderX, shoulderY + personHeight * 0.1);
+            ctx.lineTo(leftShoulderX + personWidth * 0.05, shoulderY + personHeight * 0.2);
+            ctx.quadraticCurveTo(neckX - personWidth * 0.05, shoulderY + personHeight * 0.15, neckX, shoulderY);
+            ctx.fill();
+
+            // Right trapezius muscle
+            ctx.beginPath();
+            ctx.moveTo(neckX, shoulderY);
+            ctx.quadraticCurveTo(rightShoulderX - personWidth * 0.1, shoulderY + personHeight * 0.05,
+                rightShoulderX, shoulderY + personHeight * 0.1);
+            ctx.lineTo(rightShoulderX - personWidth * 0.05, shoulderY + personHeight * 0.2);
+            ctx.quadraticCurveTo(neckX + personWidth * 0.05, shoulderY + personHeight * 0.15, neckX, shoulderY);
+            ctx.fill();
+        }
+
+        // Helper: draw rounded rectangle path (does not fill/stroke by itself)
+        function roundRect(ctx, x, y, w, h, r) {
+            const radius = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.arcTo(x + w, y, x + w, y + h, radius);
+            ctx.arcTo(x + w, y + h, x, y + h, radius);
+            ctx.arcTo(x, y + h, x, y, radius);
+            ctx.arcTo(x, y, x + w, y, radius);
+            ctx.closePath();
+        }
+
+        // Helper to get weight from data
+        function getWeightForAngle(angle) {
+            // Find the closest predefined angle less than or equal to the current angle
+            let closestData = angleData[0];
+            for (let i = 0; i < angleData.length; i++) {
+                if (angle >= angleData[i].angle) {
+                    closestData = angleData[i];
+                } else {
+                    break;
+                }
+            }
+            return closestData.weight;
+        }
+
+        // Update display based on slider
+        function updateSimulation(angle) {
+            currentAngle = angle;
+            angleSlider.value = angle;
+            currentAngleSpan.textContent = angle;
+            currentWeightSpan.textContent = getWeightForAngle(angle);
+            drawPerson(angle);
+            updateSonification(angle);
+        }
+
+        // Smooth transition function for manual changes
+        let transitionFrame;
+        let targetAngle = 0;
+        let isTransitioning = false;
+
+        function smoothTransition() {
+            const speed = 1.5; // Degrees per frame for manual transitions
+            const tolerance = 0.1;
+
+            if (Math.abs(currentAngle - targetAngle) > tolerance && !demoRunning) {
+                if (currentAngle < targetAngle) {
+                    currentAngle = Math.min(currentAngle + speed, targetAngle);
+                } else {
+                    currentAngle = Math.max(currentAngle - speed, targetAngle);
+                }
+                updateSimulation(Math.round(currentAngle * 10) / 10); // Round to 1 decimal
+                transitionFrame = requestAnimationFrame(smoothTransition);
+            } else {
+                isTransitioning = false;
+                if (!demoRunning) {
+                    currentAngle = targetAngle;
+                    updateSimulation(currentAngle);
+                }
+            }
+        }
+
+        // Event Listeners
+        angleSlider.addEventListener('input', (event) => {
+            if (!demoRunning) {
+                targetAngle = parseInt(event.target.value);
+                if (!isTransitioning) {
+                    isTransitioning = true;
+                    transitionFrame = requestAnimationFrame(smoothTransition);
+                }
+            }
+        });
+
+        // For immediate response during dragging (optional - can be removed if too sensitive)
+        angleSlider.addEventListener('change', (event) => {
+            if (!demoRunning) {
+                targetAngle = parseInt(event.target.value);
+                currentAngle = targetAngle;
+                updateSimulation(currentAngle);
+                if (transitionFrame) {
+                    cancelAnimationFrame(transitionFrame);
+                    isTransitioning = false;
+                }
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            if (!demoRunning) {
+                targetAngle = 0;
+                if (!isTransitioning) {
+                    isTransitioning = true;
+                    transitionFrame = requestAnimationFrame(smoothTransition);
+                }
+            } else {
+                // If demo is running, stop it and reset
+                demoRunning = false;
+                playDemoButton.textContent = 'Play Demo';
+                if (demoAnimationFrame) {
+                    cancelAnimationFrame(demoAnimationFrame);
+                }
+                updateSimulation(0);
+            }
+        });
+
+        let demoInterval;
+        let demoAngleIndex = 0;
+        let demoDirection = 1; // 1 for increasing, -1 for decreasing
+        let demoRunning = false;
+        let demoTargetAngle = 0;
+        let demoCurrentAngle = 0;
+        let demoAnimationFrame;
+
+        function smoothDemo() {
+            const speed = 0.5; // Degrees per frame
+            const tolerance = 0.1;
+
+            // Smooth transition to target angle
+            if (Math.abs(demoCurrentAngle - demoTargetAngle) > tolerance) {
+                if (demoCurrentAngle < demoTargetAngle) {
+                    demoCurrentAngle = Math.min(demoCurrentAngle + speed, demoTargetAngle);
+                } else {
+                    demoCurrentAngle = Math.max(demoCurrentAngle - speed, demoTargetAngle);
+                }
+                updateSimulation(Math.round(demoCurrentAngle));
+                demoAnimationFrame = requestAnimationFrame(smoothDemo);
+            } else {
+                // Reached target, wait before next transition
+                setTimeout(() => {
+                    if (demoRunning) {
+                        setNextDemoTarget();
+                        demoAnimationFrame = requestAnimationFrame(smoothDemo);
+                    }
+                }, 800); // Pause at each target for 800ms
+            }
+        }
+
+        function setNextDemoTarget() {
+            if (demoDirection === 1) {
+                demoAngleIndex++;
+                if (demoAngleIndex >= angleData.length) {
+                    demoAngleIndex = angleData.length - 1;
+                    demoDirection = -1; // Start decreasing
+                }
+            } else {
+                demoAngleIndex--;
+                if (demoAngleIndex < 0) {
+                    demoAngleIndex = 0;
+                    demoDirection = 1; // Start increasing again
+                }
+            }
+            demoTargetAngle = angleData[demoAngleIndex].angle;
+        }
+
+        playDemoButton.addEventListener('click', () => {
+            if (demoRunning) {
+                demoRunning = false;
+                playDemoButton.textContent = 'Play Demo';
+                if (demoAnimationFrame) {
+                    cancelAnimationFrame(demoAnimationFrame);
+                }
+                return;
+            }
+
+            playDemoButton.textContent = 'Stop Demo';
+            demoRunning = true;
+            demoAngleIndex = 0;
+            demoDirection = 1;
+            demoCurrentAngle = currentAngle; // Start from current position
+            demoTargetAngle = angleData[0].angle;
+
+            demoAnimationFrame = requestAnimationFrame(smoothDemo);
+        });
+
+        // Initial draw
+        updateSimulation(0);
+    </script>
+
+    <div style="width: 100%; overflow: hidden; display: flex; justify-content: center;">
+        <ins class="adsbygoogle" style="display:block; width:100%; height:auto;" data-ad-format="fluid"
+            data-ad-layout-key="-gz-1k+91-aa-6j" data-ad-client="ca-pub-5059340394452084" data-ad-slot="6853166733"
+            data-adsbygoogle-status="done"><iframe id="aswift_0"
+                style="height: 1px !important; max-height: 1px !important; max-width: 1px !important; width: 1px !important;"><iframe
+                    id="google_ads_frame0"></iframe></iframe></ins>
+    </div>
+    <script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5059340394452084"
+        crossorigin="anonymous"></script>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script defer=""
+        src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015"
+        integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
+        data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;2a52b1c7fa7b4c5ca257ed0ca8b5f513&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}"
+        crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
